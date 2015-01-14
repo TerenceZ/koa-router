@@ -1,10 +1,9 @@
-# Router middleware for [koa](https://github.com/koajs/koa)
+# An express-style router middleware for [koa](https://github.com/koajs/koa)
 
-[![Build Status](https://secure.travis-ci.org/alexmingoia/koa-router.png)](http://travis-ci.org/alexmingoia/koa-router)
-[![Dependency Status](https://david-dm.org/alexmingoia/koa-router.png)](http://david-dm.org/alexmingoia/koa-router)
-[![NPM version](https://badge.fury.io/js/koa-router.png)](http://badge.fury.io/js/koa-router)
+[![Build Status](https://secure.travis-ci.org/TerenceZ/siren-router.png)](http://travis-ci.org/TerenceZ/siren-router)
 
 * Express-style routing using `app.get`, `app.put`, `app.post`, etc.
+* Support for mounting generator function and koa instance.
 * Named URL parameters and regexp captures.
 * String or regular expression route matching.
 * Named routes with URL generation.
@@ -15,10 +14,8 @@
 
 ## Install
 
-koa-router is available using [npm](https://npmjs.org):
-
 ```
-npm install koa-router
+npm install git://github.com/TerenceZ/siren-router.git
 ```
 
 ## Usage
@@ -27,7 +24,7 @@ Require the router and mount the middleware:
 
 ```javascript
 var koa = require('koa')
-  , router = require('koa-router')
+  , router = require('siren-router')
   , app = koa();
 
 app.use(router(app));
@@ -55,19 +52,19 @@ var koa = require('koa');
 var app = koa();
 
 var APIv1 = new Router();
-var APIv2 = new Router();
+var app2 = koa();
 
 APIv1.get('/sign-in', function *() {
   // ...
 });
 
-APIv2.get('/sign-in', function *() {
+app2.use(function *() {
   // ...
 });
 
 app
-  .use(mount('/v1', APIv1.middleware()))
-  .use(mount('/v2', APIv2.middleware()));
+  .mount('/v1', APIv1.middleware())
+  .mount('/v2', app2); // You can mount the application directly.
 ```
 
 ### Chaining
@@ -85,12 +82,6 @@ api
 ```
 
 ## API
-
-### Migrating from 2.x to 3.x
-
-Resource routing was separated into the
-[koa-resource-router](https://github.com/alexmingoia/koa-resource-router)
-module.
 
 ### Router#verb([name, ]path, middleware[, middleware...])
 
@@ -197,7 +188,9 @@ app.get(/^\/blog\/\d{4}-\d{2}-\d{2}\/?$/i, function *(next) {
 
 #### Multiple methods
 
-Create routes with multiple HTTP methods using `router.register()`:
+Create routes with multiple HTTP methods using `router.register()`.
+If the `methods` argument is an empty array, the route will be registered as a prefix
+pattern.
 
 ```javascript
 app.register('/', ['get', 'post'], function *(next) {
@@ -210,6 +203,14 @@ Create route for all methods using `router.all()`:
 ```javascript
 app.all('/', function *(next) {
   // ...
+});
+```
+
+Create route for path starting with "/prefix/:id" using `router.mount()`:
+
+```javascript
+app.mount("/prefix/:id", function *(next) {
+  // This will match paths like /prefix/abcd, /prefix/abcd/dffgf, etc.
 });
 ```
 

@@ -1,6 +1,6 @@
 {
   "name": "koa-router",
-  "description": "An express-like router middleware for koa.",
+  "description": "An express-style router middleware for koa.",
   "repository": {
     "type": "git",
     "url": "https://github.com/TerenceZ/koa-router.git"
@@ -17,7 +17,7 @@
     "methods": "^1.1.1",
     "path-to-regexp": "^1.0.2",
     "koa-compose": "^2.3.0",
-    "debuglog": "^1.0.1",
+    "debuglog": "^1.0.1"
   },
   "peerDependencies": {
     "koa": "^0.14.0"
@@ -28,11 +28,10 @@
     "supertest": "^0.15.0"
   },
   "scripts": {
-    "test": "NODE_ENV=sirentest node_modules/mocha/bin/mocha --harmony --recursive --reporter spec"
+    "test": "NODE_ENV=test node_modules/mocha/bin/mocha --harmony --recursive --reporter spec"
   },
   "engines": {
-    "node": "> 0.11.4",
-    "iojs": "> 1.0.1"
+    "node": "> 0.11.4"
   },
   "license": "MIT"
 }

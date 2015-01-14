@@ -1,8 +1,10 @@
 /**
- * RESTful resource routing middleware for koa.
+ * An express-style router middleware for koa.
  *
- * @author Alex Mingoia <talk@alexmingoia.com>
- * @link https://github.com/alexmingoia/koa-router
+ * @author [Alex Mingoia <talk@alexmingoia.com>, TerenceZ <texvnars@gmail.com>]
+ * @link https://github.com/TerenceZ/siren-router
  */
 
-module.exports = require('./lib/router');
+"use strict";
+
+module.exports = require("./lib/router");

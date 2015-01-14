@@ -2,14 +2,18 @@
  * Module tests
  */
 
-var koa = require('koa')
-  , should = require('should');
+"use strict";
 
-describe('module', function() {
-  it('should expose Router', function(done) {
-    var Router = require('..');
-    should.exist(Router);
-    Router.should.be.type('function');
-    done();
-  });
+var koa = require("koa");
+var should = require("should");
+
+
+describe("router", function () {
+
+	it("should expose Router", function () {
+
+		var Router = require("..");
+		should.exist(Router);
+		Router.should.be.type("function");
+	});
 });
