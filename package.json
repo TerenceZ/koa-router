@@ -1,12 +1,12 @@
 {
   "name": "koa-router",
-  "description": "Router middleware for koa. Provides RESTful resource routing.",
+  "description": "An express-like router middleware for koa.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexmingoia/koa-router.git"
+    "url": "https://github.com/TerenceZ/koa-router.git"
   },
-  "author": "Alex Mingoia <talk@alexmingoia.com>",
-  "version": "3.8.0",
+  "author": ["Alex Mingoia <talk@alexmingoia.com>", "TerenceZ <texvnars@gmail.com>"],
+  "version": "1.0.0",
   "keywords": [
     "koa",
     "middleware",
@@ -14,23 +14,25 @@
     "route"
   ],
   "dependencies": {
-    "methods": "^1.0.1",
-    "path-to-regexp": "^1.0.0",
-    "debug": "^2.1.0",
-    "koa-compose": "^2.3.0"
+    "methods": "^1.1.1",
+    "path-to-regexp": "^1.0.2",
+    "koa-compose": "^2.3.0",
+    "debuglog": "^1.0.1",
+  },
+  "peerDependencies": {
+    "koa": "^0.14.0"
   },
   "devDependencies": {
-    "expect.js": "^0.3.1",
-    "koa": "^0.13.0",
-    "mocha": "^2.0.1",
-    "should": "^4.3.0",
+    "mocha": "^2.1.0",
+    "should": "^4.4.2",
     "supertest": "^0.15.0"
   },
   "scripts": {
-    "test": "NODE_ENV=test node_modules/mocha/bin/mocha --harmony-generators --recursive --reporter spec"
+    "test": "NODE_ENV=sirentest node_modules/mocha/bin/mocha --harmony --recursive --reporter spec"
   },
   "engines": {
-    "node": "> 0.11.4"
+    "node": "> 0.11.4",
+    "iojs": "> 1.0.1"
   },
   "license": "MIT"
 }
