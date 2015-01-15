@@ -315,12 +315,12 @@ describe("router/lib/router", function () {
       var router = new Router(app);
       app.use(router.middleware());
 
-      router.mount("/first", function *(next) {
+      router
+      .mount("/first", function *(next) {
         yield *next;
         counter++;
-      });
-
-      router.mount("/first/:id", [
+      })
+      .mount("/first/:id", [
         function *(next) {
 
           yield *next;
@@ -497,6 +497,7 @@ describe("router/lib/router", function () {
       var app = koa();
       app.use(Router(app))
       .param("user", function *(id, next) {
+
         this.state.user = {
           name: "alex",
           id: id
@@ -508,12 +509,22 @@ describe("router/lib/router", function () {
         }
         yield *next;
       })
-      .get("/users/:user", function *(next) {
+      .get("/users/:user/:action", function *(next) {
+
         this.body = this.state.user;
+      })
+      .param("action", function *(action, next) {
+
+        if (!action) {
+          return this.status = 404;
+        }
+
+        this.state.user.action = action;
+        yield *next;
       });
 
       request(app.listen())
-      .get("/users/3")
+      .get("/users/3/a")
       .expect(200)
       .end(function (err, res) {
 
@@ -524,6 +535,7 @@ describe("router/lib/router", function () {
         res.should.have.property("body");
         res.body.should.have.property("name", "alex");
         res.body.should.have.property("id", "3");
+        res.body.should.have.property("action", "a");
         done();
       });
     });
@@ -560,7 +572,7 @@ describe("router/lib/router", function () {
         orders.push(1);
         yield *next;
       })
-      .get("/:first/users/:user", function *(next) {
+      .mount("/:first/users/:user", function *(next) {
 
         should.exist(this.state.user);
         should.not.exist(this.state.user.orders);
@@ -597,11 +609,12 @@ describe("router/lib/router", function () {
     it("should respond with 200", function (done) {
 
       var app = koa();
-      app.use(Router(app, {
-        strict: true
-      }))
+      app.use(Router(app))
       .get("/info", function *() {
         this.body = "hello";
+      })
+      .mount("/info2", function *() {
+        this.body = "hello2";
       });
 
       request(app.listen())
@@ -613,16 +626,62 @@ describe("router/lib/router", function () {
         }
 
         res.text.should.equal("hello");
-        done();
+        
+        request(app.listen())
+        .get("/info2/")
+        .expect(200, function (err, res) {
+
+          if (err) {
+            return done(err);
+          }
+
+          res.text.should.equal("hello2");
+          done();
+        });
+      });
+    });
+
+    it("should enable strict mode in default", function (done) {
+
+      var app = koa();
+      app.use(Router(app))
+      .mount("/info", function *(next) {
+        this.body = "hello";
+        yield *next;
+      })
+      .mount("/info/", function *(next) {
+        this.body = "hello2";
+        yield *next;
+      });
+
+      request(app.listen())
+      .get("/info")
+      .expect(200, function (err, res) {
+
+        if (err) {
+          return done(err);
+        }
+
+        res.text.should.equal("hello");
+        
+        request(app.listen())
+        .get("/info/")
+        .expect(200, function (err, res) {
+
+          if (err) {
+            return done(err);
+          }
+
+          res.text.should.equal("hello2");
+          done();
+        });
       });
     });
 
     it("should respond with 404 when has a trailing slash", function (done) {
 
       var app = koa();
-      var router = new Router(app, {
-        strict: true
-      });
+      var router = new Router(app);
 
       app.use(router.middleware())
       .get("/info", function *() {
@@ -645,6 +704,46 @@ describe("router/lib/router", function () {
       .get("/info2/abc")
       .expect(200)
       .expect("hello2", done);
+    });
+
+    it("should initial with only `opts`", function () {
+
+      var router = new Router({
+        strict: false
+      });
+
+      should.exist(router.opts);
+      router.opts.should.have.property("strict", false);
+    });
+
+    it("should merge original app params with router params", function (done) {
+
+      var app = koa();
+      app.context.params = {
+        "hello": "world"
+      };
+
+      app.use(Router(app, { mergeParams: true }))
+      .get("/:id/:id2", function *(next) {
+
+        should.exist(this.params);
+        this.params.should.have.property("hello", "world");
+        this.params.should.have.property("id", "a");
+        this.params.should.have.property("id2", "b");
+        yield *next;
+      })
+      .get("/:id3/:id4", function *() {
+
+        should.exist(this.params);
+        this.params.should.have.property("hello", "world");
+        this.params.should.have.property("id3", "a");
+        this.params.should.have.property("id4", "b");
+        this.status = 204;
+      });
+
+      request(app.listen())
+      .get("/a/b")
+      .expect(204, done);
     });
   });
 

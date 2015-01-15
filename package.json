@@ -5,7 +5,10 @@
     "type": "git",
     "url": "https://github.com/TerenceZ/siren-router.git"
   },
-  "author": ["Alex Mingoia <talk@alexmingoia.com>", "TerenceZ <texvnars@gmail.com>"],
+  "author": [
+    "Alex Mingoia <talk@alexmingoia.com>",
+    "TerenceZ <texvnars@gmail.com>"
+  ],
   "version": "1.0.1",
   "keywords": [
     "koa",
@@ -20,16 +23,15 @@
     "debuglog": "^1.0.1"
   },
   "devDependencies": {
+    "istanbul-harmony": "^0.3.1",
     "koa": "^0.14.0",
     "mocha": "^2.1.0",
     "should": "^4.4.2",
     "supertest": "^0.15.0"
   },
   "scripts": {
-    "test": "set NODE_ENV=test & node node_modules/mocha/bin/mocha --harmony --recursive --reporter spec"
-  },
-  "engines": {
-    "node": ">= 0.11.13"
+    "test": "NODE_ENV=test node node_modules/mocha/bin/mocha --harmony --recursive --reporter spec",
+    "test-cov": "NODE_ENV=test ode --harmony ./node_modules/istanbul-harmony/lib/cli cover ./node_modules/mocha/bin/_mocha -- --recursive"
   },
   "license": "MIT"
 }
