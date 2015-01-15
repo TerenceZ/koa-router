@@ -11,12 +11,18 @@ siren-router extends the [koa-router](https://github.com/alexmingoia/koa-router)
 ## Install
 
 ```
+npm install --save siren-router
+```
+
+or
+
+```
 npm install git://github.com/TerenceZ/siren-router.git
 ```
 
 ## Usage
 
-The usage is the same as [koa-router](https://github.com/alexmingoia/koa-router), expect:
+The usage is the same as [koa-router](https://github.com/alexmingoia/koa-router), except:
 
 ### Multiple routers
 
