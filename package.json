@@ -9,7 +9,7 @@
     "Alex Mingoia <talk@alexmingoia.com>",
     "TerenceZ <texvnars@gmail.com>"
   ],
-  "version": "1.0.1",
+  "version": "1.0.2",
   "keywords": [
     "koa",
     "middleware",
