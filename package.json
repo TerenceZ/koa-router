@@ -30,8 +30,8 @@
     "supertest": "^0.15.0"
   },
   "scripts": {
-    "test": "NODE_ENV=test node node_modules/mocha/bin/mocha --harmony --recursive --reporter spec",
-    "test-cov": "NODE_ENV=test ode --harmony ./node_modules/istanbul-harmony/lib/cli cover ./node_modules/mocha/bin/_mocha -- --recursive"
+    "test": "NODE_ENV=test mocha --harmony --require should --reporter spec --recursive",
+    "test-cov": "NODE_ENV=test node --harmony ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --require should --recursive"
   },
   "license": "MIT"
 }

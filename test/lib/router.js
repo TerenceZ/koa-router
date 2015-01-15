@@ -719,27 +719,25 @@ describe("router/lib/router", function () {
     it("should merge original app params with router params", function (done) {
 
       var app = koa();
-      app.context.params = {
-        "hello": "world"
-      };
+      var a = koa();
 
-      app.use(Router(app, { mergeParams: true }))
-      .get("/:id/:id2", function *(next) {
+      a.use(Router(a, { mergeParams: true }))
+      .get("/:id2", function *(next) {
 
         should.exist(this.params);
-        this.params.should.have.property("hello", "world");
         this.params.should.have.property("id", "a");
         this.params.should.have.property("id2", "b");
+        this.status = 204;
         yield *next;
-      })
-      .get("/:id3/:id4", function *() {
+      });
+
+      app.use(Router(app))
+      .mount("/:id", function *(next) {
 
         should.exist(this.params);
-        this.params.should.have.property("hello", "world");
-        this.params.should.have.property("id3", "a");
-        this.params.should.have.property("id4", "b");
-        this.status = 204;
-      });
+        this.params.should.have.property("id", "a");
+        yield *next;
+      }, a);
 
       request(app.listen())
       .get("/a/b")
