@@ -150,7 +150,7 @@ describe("router/lib/router", function () {
     app.get("/", function *(next) {
 
       var start = Date.now();
-      sleepTime = yield sleep(456);
+      sleepTime = yield sleep(500);
       duration = Date.now() - start;
       this.status = 204;
       return yield *next;
@@ -320,7 +320,19 @@ describe("router/lib/router", function () {
         counter++;
       });
 
-      router.mount("/first/:id", function *(next) {
+      router.mount("/first/:id", [
+        function *(next) {
+
+          yield *next;
+          counter++;
+        },
+
+        function *(next) {
+          yield *next;
+          counter++;
+        }
+      ], function *(next) {
+
         yield *next;
         counter++;
       });
@@ -339,7 +351,7 @@ describe("router/lib/router", function () {
           return done(err);
         }
 
-        counter.should.equal(3);
+        counter.should.equal(5);
         counter = 0;
         request(app.listen())
         .get("/first/sec")
@@ -349,7 +361,7 @@ describe("router/lib/router", function () {
             return done(err);
           }
 
-          counter.should.equal(2);
+          counter.should.equal(4);
           done();
         });
       });
@@ -389,26 +401,6 @@ describe("router/lib/router", function () {
       router.routes.should.be.an.instanceOf(Array);
       router.routes.should.have.property("length", 1);
       router.routes[0].should.have.property("path", "/");
-    });
-
-    it("should register prefixed router", function (done) {
-
-      var app = koa();
-      var router = new Router(app);
-      router.should.have.property("register");
-      router.register.should.be.type("function");
-      
-      var route = router.register("/", [], function *() {
-        this.status = 204;
-      });
-      router.routes.should.be.an.instanceOf(Array);
-      router.routes.should.have.property("length", 1);
-      router.routes[0].should.have.property("path", "/");
-
-      app.use(router.middleware());
-      request(app.listen())
-      .get("/abc")
-      .expect(204, done);
     });
   });
 

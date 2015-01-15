@@ -77,6 +77,35 @@ describe("router/lib/route", function() {
     .expect(204, done);
   });
 
+  it("should flatten middleware array", function (done) {
+
+    var app = koa();
+    app.use(Router(app))
+    .get("/:category/:title", [
+      function *(next) {
+
+        this.status = 500;
+        yield *next;
+      },
+
+      function *(next) {
+
+        this.status.should.equal(500);
+        this.status = 501;
+        yield *next;
+      }
+    ], function *(next) {
+
+      this.status.should.equal(501);
+      this.status = 204;
+      yield *next;
+    });
+
+    request(app.listen())
+    .get("/programming/how-to-node")
+    .expect(204, done);
+  });
+
   it("should be as prefix when no methods specified", function (done) {
 
     var app = koa();
@@ -186,7 +215,7 @@ describe("router/lib/route", function() {
       .expect(204, done);
     });
 
-    it("can koa instance as middleware", function () {
+    it("can mount koa instance as middleware", function () {
 
       var app = koa();
       app.use(Router(app));

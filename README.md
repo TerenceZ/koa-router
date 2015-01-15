@@ -2,15 +2,11 @@
 
 [![Build Status](https://secure.travis-ci.org/TerenceZ/siren-router.png)](http://travis-ci.org/TerenceZ/siren-router)
 
-* Express-style routing using `app.get`, `app.put`, `app.post`, etc.
-* Support for mounting generator function and koa instance.
-* Named URL parameters and regexp captures.
-* String or regular expression route matching.
-* Named routes with URL generation.
-* Responds to `OPTIONS` requests with allowed methods.
-* Support for `405 Method Not Allowed` and `501 Not Implemented`.
-* Multiple route middleware.
-* Multiple routers.
+siren-router extends the [koa-router](https://github.com/alexmingoia/koa-router) by:
+* Support for mounting generator function and koa instance using `app.mount`.
+* Remove routerPath in Router.
+* Auto replacing `ctx.path` and `ctx.params` when enter a router and restore back when exit the router.
+* Support middleware array to pass in app[verb].
 
 ## Install
 
@@ -20,24 +16,7 @@ npm install git://github.com/TerenceZ/siren-router.git
 
 ## Usage
 
-Require the router and mount the middleware:
-
-```javascript
-var koa = require('koa')
-  , router = require('siren-router')
-  , app = koa();
-
-app.use(router(app));
-```
-
-After the router has been initialized you can register routes:
-
-```javascript
-app.get('/users/:id', function *(next) {
-  var user = yield User.findOne(this.params.id);
-  this.body = user;
-});
-```
+The usage is the same as [koa-router](https://github.com/alexmingoia/koa-router), expect:
 
 ### Multiple routers
 
@@ -67,20 +46,6 @@ app
   .mount('/v2', app2); // You can mount the application directly.
 ```
 
-### Chaining
-
-The http methods (get, post, etc) return their `Router` instance,
-so routes can be chained as you're used to with express:
-
-```javascript
-var api = new Router();
-
-api
-  .get('/foo', showFoo)
-  .get('/bar', showBar)
-  .post('/foo', createFoo);
-```
-
 ## API
 
 ### Router#verb([name, ]path, middleware[, middleware...])
@@ -93,13 +58,22 @@ app
   .get('/', function *(next) {
     this.body = 'Hello World!';
   })
-  .post('/users', function *(next) {
-    // ...
+  .post('/users', [
+    function *(next) {
+      // ...
+    }, function *(next) {
+      // ...
+    }
+  ], function *(next) {
+      // ...
   })
   .put('/users/:id', function *(next) {
     // ...
   })
-  .del('/users/:id', function *(next) {
+  .delete('/users/:id', function *(next) {
+    // ...
+  })
+  .mount('/users/:id', function *(next) {
     // ...
   });
 ```
@@ -108,103 +82,7 @@ Route paths will be translated to regular expressions used to match requests.
 
 Query strings will not be considered when matching requests.
 
-#### Named routes
-
-Routes can optionally have names. This allows generation of URLs and easy
-renaming of URLs during development.
-
-```javascript
-app.get('user', '/users/:id', function *(next) {
- // ...
-});
-
-app.url('user', 3);
-// => "/users/3"
-```
-
-#### Multiple middleware
-
-Multiple middleware may be given and are composed using
-[koa-compose](https://github.com/koajs/koa-compose):
-
-```javascript
-app.get(
-  '/users/:id',
-  function *(next) {
-    this.user = yield User.findOne(this.params.id);
-    yield next;
-  },
-  function *(next) {
-    console.log(this.user);
-    // => { id: 17, name: "Alex" }
-  }
-);
-```
-
-#### URL parameters
-
-Named route parameters are captured and added to `ctx.params`.
-
-Capture groups from regular expression routes are also added to
-`ctx.params`, which is an array.
-
-##### Named parameters
-
-```javascript
-app.get('/:category/:title', function *(next) {
-  console.log(this.params);
-  // => [ category: 'programming', title: 'how-to-node' ]
-});
-```
-
-##### Parameter middleware
-
-Run middleware for named route parameters. Useful for auto-loading or
-validation.
-
-```javascript
-app
-  .param('user', function *(id, next) {
-    this.user = users[id];
-    if (!this.user) return this.status = 404;
-    yield next;
-  })
-  .get('/users/:user', function *(next) {
-    this.body = this.user;
-  })
-```
-
-##### Regular expressions
-
-Control route matching exactly by specifying a regular expression instead of
-a path string when creating the route. For example, it might be useful to match
-date formats for a blog, such as `/blog/2013-09-04`:
-
-```javascript
-app.get(/^\/blog\/\d{4}-\d{2}-\d{2}\/?$/i, function *(next) {
-  // ...
-});
-```
-
-#### Multiple methods
-
-Create routes with multiple HTTP methods using `router.register()`.
-If the `methods` argument is an empty array, the route will be registered as a prefix
-pattern.
-
-```javascript
-app.register('/', ['get', 'post'], function *(next) {
-  // ...
-});
-```
-
-Create route for all methods using `router.all()`:
-
-```javascript
-app.all('/', function *(next) {
-  // ...
-});
-```
+#### Mounting
 
 Create route for path starting with "/prefix/:id" using `router.mount()`:
 
@@ -214,47 +92,27 @@ app.mount("/prefix/:id", function *(next) {
 });
 ```
 
-### Router#redirect(source, destination, [code])
+### Auto Replace and Restore the `ctx.path` and `ctx.params`
 
-Redirect `source` to `destination` URL with optional 30x status `code`.
-
-Both `source` and `destination` can be route names.
+When enter the router, the `ctx.params` will replace/merge (according to `opts.mergeParams`).
 
 ```javascript
-app.redirect('/login', 'sign-in');
-```
-
-This is equivalent to:
-
-```javascript
-app.all('/login', function *() {
-  this.redirect('/sign-in');
-  this.status = 301;
-});
-```
-
-### Router#route(name)
-
-Lookup route with given `name`. Returns the route or `false`.
-
-### Router#url(name, params)
-
-Generate URL for route. Takes either map of named `params` or series of
-arguments (for regular expression routes).
-
-Returns `Error` if no route is found with given `name`.
-
-```javascript
-app.get('user', '/users/:id', function *(next) {
- // ...
-});
-
-app.url('user', 3);
-// => "/users/3"
-
-app.url('user', { id: 3 });
-// => "/users/3"
-```
+app
+  .use('/:id', function *(next) {
+    console.log(this.path); // => '/update'
+    console.log(this.params); // => { id: 'alex' }
+    yield *next;
+    console.log(this.path); // => '/update'
+    console.log(this.params); // => { id: 'alex' }
+  })
+  .get('/alex/:action', function *(next) {
+    console.log(this.path); // => '/'
+    console.log(this.params); // => { action: 'update' }
+    yield *next;
+    console.log(this.path); // => '/'
+    console.log(this.params); // => { action: 'update' }
+  });
+``` 
 
 ## Tests
 

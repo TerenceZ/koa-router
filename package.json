@@ -6,7 +6,7 @@
     "url": "https://github.com/TerenceZ/koa-router.git"
   },
   "author": ["Alex Mingoia <talk@alexmingoia.com>", "TerenceZ <texvnars@gmail.com>"],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "koa",
     "middleware",
@@ -26,7 +26,7 @@
     "supertest": "^0.15.0"
   },
   "scripts": {
-    "test": "NODE_ENV=test node_modules/mocha/bin/mocha --harmony --recursive --reporter spec"
+    "test": "set NODE_ENV=test & node node_modules/mocha/bin/mocha --harmony --recursive --reporter spec"
   },
   "engines": {
     "node": ">= 0.11.13"
