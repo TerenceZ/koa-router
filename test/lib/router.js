@@ -641,16 +641,66 @@ describe("router/lib/router", function () {
       });
     });
 
-    it("should enable strict mode in default", function (done) {
+    it("should unable strict mode in default except mounting", function (done) {
 
       var app = koa();
       app.use(Router(app))
-      .mount("/info", function *(next) {
-        this.body = "hello";
+      .get("/info/", function *(next) {
+        this.body = (this.body || "" ) + "hello";
         yield *next;
       })
       .mount("/info/", function *(next) {
-        this.body = "hello2";
+        this.body = (this.body || "" ) + "hello2";
+        yield *next;
+      });
+
+      request(app.listen())
+      .get("/info")
+      .expect(200, function (err, res) {
+
+        if (err) {
+          return done(err);
+        }
+
+        res.text.should.equal("hello");
+
+        request(app.listen())
+        .get("/info/")
+        .expect(200, function (err, res) {
+
+          if (err) {
+            return done(err);
+          }
+
+          res.text.should.equal("hellohello2");
+          done();
+        });
+      });
+    });
+
+    it("cannot override strict mode for mounting", function (done) {
+
+      var app = koa();
+      app.use(Router(app, { strict: false }))
+      .mount("/info/", function *(next) {
+        this.status = 204;
+      });
+
+      request(app.listen())
+      .get("/info")
+      .expect(404, done);
+    });
+
+    it("should enable strict mode", function (done) {
+
+      var app = koa();
+      app.use(Router(app, { strict: true }))
+      .get("/info", function *(next) {
+        this.body = (this.body || "" ) + "hello";
+        yield *next;
+      })
+      .get("/info/", function *(next) {
+        this.body = (this.body || "" ) + "hello2";
         yield *next;
       });
 
@@ -676,34 +726,6 @@ describe("router/lib/router", function () {
           done();
         });
       });
-    });
-
-    it("should respond with 404 when has a trailing slash", function (done) {
-
-      var app = koa();
-      var router = new Router(app);
-
-      app.use(router.middleware())
-      .get("/info", function *() {
-        this.body = "hello";
-      });
-
-      router.mount("/info2/", function *() {
-        this.body = "hello2";
-      });
-
-      request(app.listen())
-      .get("/info/")
-      .expect(404, doneIfError(done));
-
-      request(app.listen())
-      .get("/info2")
-      .expect(404, doneIfError(done));
-
-      request(app.listen())
-      .get("/info2/abc")
-      .expect(200)
-      .expect("hello2", done);
     });
 
     it("should initial with only `opts`", function () {

@@ -9,7 +9,7 @@
     "Alex Mingoia <talk@alexmingoia.com>",
     "TerenceZ <texvnars@gmail.com>"
   ],
-  "version": "1.0.2",
+  "version": "1.0.3",
   "keywords": [
     "koa",
     "middleware",
@@ -31,7 +31,9 @@
   },
   "scripts": {
     "test": "NODE_ENV=test mocha --harmony --require should --reporter spec --recursive",
+    "test-win": "set NODE_ENV=test & mocha --harmony --require should --reporter spec --recursive",
     "test-cov": "NODE_ENV=test node --harmony ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --require should --recursive",
+    "test-cov-win": "set NODE_ENV=test & node --harmony ./node_modules/istanbul-harmony/lib/cli cover ./node_modules/mocha/bin/_mocha -- --require should --recursive",
     "test-travis": "NODE_ENV=test node --harmony ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report lcovonly -- --require should --recursive"
   },
   "license": "MIT"

@@ -98,6 +98,8 @@ app.mount("/prefix/:id", function *(next) {
 });
 ```
 
+Notice that the mounting path is forced to be strict, no matter what the `opts.strict` is.
+
 ### Auto Replace and Restore the `ctx.path` and `ctx.params`
 
 When enter the router, the `ctx.params` will replace/merge (according to `opts.mergeParams`).
