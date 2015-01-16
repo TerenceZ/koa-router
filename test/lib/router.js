@@ -200,6 +200,46 @@ describe("router/lib/router", function () {
     .expect(501, done);
   });
 
+  it("should not respond 501 when downstream / upstream set the status", function (done) {
+
+    var app = koa();
+    app.use(Router(app));
+    app.get("/user", function *() { });
+    app.post("/user", function *() { });
+    app.use(function *() {
+
+      this.status = 204;
+    });
+
+    request(app.listen())
+    .del("/user")
+    .expect(204, done);
+  });
+
+  it("should handle OPTIONS in default on upstream when status not set", function (done) {
+
+    var app = koa();
+    var counter = 0;
+    app.use(Router(app));
+    app.get("/user", function *() { });
+    app.use(function *() {
+
+      this.status.should.equal(404);
+    });
+
+    request(app.listen())
+    .options("/user")
+    .expect(204, function (err, res) {
+
+      if (err) {
+        return done(err);
+      }
+
+      res.header.should.have.property("allow", "GET");
+      done();
+    });
+  });
+
   it("should restore ctxt.path and ctx.params when exit routing", function (done) {
 
     var app = koa();
