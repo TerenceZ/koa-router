@@ -466,6 +466,29 @@ describe("router/lib/router", function () {
       .expect(204, done);
     });
 
+    it("can mount Router instance", function (done) {
+
+      var app = koa();
+      var a = new Router({
+        mergeParams: true
+      });
+
+      a.get("/", function *(next) {
+
+        this.path.should.equal("/");
+        should.exist(this.params);
+        this.params.should.have.property("id", "world");
+        this.status = 204;
+      });
+
+      app.use(Router(app))
+      .mount("/hello/:id", a);
+
+      request(app.listen())
+      .get("/hello/world")
+      .expect(204, done);
+    });
+
     it("should respond 404 when not found in sub-router", function (done) {
 
       var app = koa();

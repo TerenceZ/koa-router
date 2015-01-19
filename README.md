@@ -36,7 +36,7 @@ var koa = require('koa');
 
 var app = koa();
 
-var APIv1 = new Router();
+var APIv1 = new Router({ mergeParams: true });
 var app2 = koa();
 
 APIv1.get('/sign-in', function *() {
@@ -48,7 +48,7 @@ app2.use(function *() {
 });
 
 app
-  .mount('/v1', APIv1.middleware())
+  .mount('/v1', APIv1)
   .mount('/v2', app2); // You can mount the application directly.
 ```
 
