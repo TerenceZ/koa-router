@@ -9,7 +9,7 @@
     "Alex Mingoia <talk@alexmingoia.com>",
     "TerenceZ <texvnars@gmail.com>"
   ],
-  "version": "1.0.4",
+  "version": "1.0.5",
   "keywords": [
     "koa",
     "middleware",
@@ -17,10 +17,11 @@
     "route"
   ],
   "dependencies": {
+    "debuglog": "^1.0.1",
+    "koa-compose": "^2.3.0",
     "methods": "^1.1.1",
     "path-to-regexp": "^1.0.2",
-    "koa-compose": "^2.3.0",
-    "debuglog": "^1.0.1"
+    "statuses": "^1.2.0"
   },
   "devDependencies": {
     "istanbul-harmony": "^0.3.1",

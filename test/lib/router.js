@@ -176,8 +176,7 @@ describe("router/lib/router", function () {
 
     request(app.listen())
     .options("/user")
-    .expect(204)
-    .end(function (err, res) {
+    .expect(204, function (err, res) {
 
       if (err) {
         return done(err);
@@ -196,11 +195,11 @@ describe("router/lib/router", function () {
     app.post("/user", function *() { });
 
     request(app.listen())
-    .del("/user")
+    .delete("/user")
     .expect(501, done);
   });
 
-  it("should not respond 501 when downstream / upstream set the status", function (done) {
+  it("should not respond 501 when downstream / upstream has set the status", function (done) {
 
     var app = koa();
     app.use(Router(app));
@@ -212,32 +211,71 @@ describe("router/lib/router", function () {
     });
 
     request(app.listen())
-    .del("/user")
+    .delete("/user")
     .expect(204, done);
   });
 
-  it("should handle OPTIONS in default on upstream when status not set", function (done) {
+  it("should not respond 501 when downstream / upstream has set the body", function (done) {
 
     var app = koa();
-    var counter = 0;
     app.use(Router(app));
     app.get("/user", function *() { });
+    app.post("/user", function *() { });
     app.use(function *() {
 
-      this.status.should.equal(404);
+      this.body = "Hello";
     });
 
     request(app.listen())
-    .options("/user")
-    .expect(204, function (err, res) {
+    .delete("/user")
+    .expect(200, "Hello", done);
+  });
 
-      if (err) {
-        return done(err);
-      }
+  it("should respond with 405 Method Not Allowed", function (done) {
 
-      res.header.should.have.property("allow", "GET");
-      done();
-    });
+      var app = koa();
+      app.use(Router(app));
+      app.get("/user", function *() { });
+      app.post("/user", function *() { });
+      app.delete("/others", function *() { })
+
+      request(app.listen())
+      .delete("/user")
+      .expect(405, done);
+  });
+
+  it("should not respond 405 when downstream / upstream has set the status", function (done) {
+
+      var app = koa();
+      app.use(Router(app));
+      app.get("/user", function *() { });
+      app.post("/user", function *() { });
+      app.delete("/others", function *() { })
+      app.use(function *() {
+
+        this.status = 204;
+      });
+
+      request(app.listen())
+      .delete("/user")
+      .expect(204, done);
+  });
+
+  it("should not respond 405 when downstream / upstream has set the body", function (done) {
+
+      var app = koa();
+      app.use(Router(app));
+      app.get("/user", function *() { });
+      app.post("/user", function *() { });
+      app.delete("/others", function *() { })
+      app.use(function *() {
+
+        this.body = "Hello";
+      });
+
+      request(app.listen())
+      .delete("/user")
+      .expect(200, "Hello", done);
   });
 
   it("should restore ctxt.path and ctx.params when exit routing", function (done) {
@@ -395,7 +433,7 @@ describe("router/lib/router", function () {
         counter = 0;
         request(app.listen())
         .get("/first/sec")
-        .expect(501, function (err) {
+        .expect(404, function (err) {
 
           if (err) {
             return done(err);
@@ -426,6 +464,25 @@ describe("router/lib/router", function () {
       request(app.listen())
       .get("/hello/world")
       .expect(204, done);
+    });
+
+    it("should respond 404 when not found in sub-router", function (done) {
+
+      var app = koa();
+
+      app.use(Router(app));
+
+      var router = new Router();
+      router.get("/a", function *() {
+
+        this.body = "A";
+      });
+
+      app.mount("/b", router.middleware());
+
+      request(app.listen())
+      .get("/b/c")
+      .expect(404, done);
     });
   });
 
