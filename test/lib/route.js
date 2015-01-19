@@ -226,6 +226,27 @@ describe("router/lib/route", function() {
       }).should.not.throw();
     });
 
+    it("can mount Router instance as middleware", function () {
+
+      var app = koa();
+      app.use(Router(app));
+
+      (function () {
+
+        app.get("foo", "/foo", new Router());
+      }).should.not.throw();
+    });
+
+    it("should filter the non-middleware without error thrown", function () {
+
+      var app = koa();
+      app.use(Router(app));
+      (function () {
+
+        app.get("foo", "/foo", undefined, [undefined, function *() {}], undefined);
+      }).should.not.throw();
+    });
+
     it("should throw friendly error message when handle not exists", function () {
 
       var app = koa();
@@ -233,18 +254,18 @@ describe("router/lib/route", function() {
 
       (function () {
 
-        app.get("/foo", undefined);
-      }).should.throw("get `/foo`: `middleware` must be a function or application, not `undefined`");
+        app.get("/foo", 1);
+      }).should.throw("get `/foo`: `middleware` must be a function, router or application, not `number`");
 
       (function () {
 
-        app.get("foo", "/foo", undefined);
-      }).should.throw("get `foo`: `middleware` must be a function or application, not `undefined`");
+        app.get("foo", "/foo", "sd");
+      }).should.throw("get `foo`: `middleware` must be a function, router or application, not `string`");
 
       (function () {
 
-        app.post("/foo", function *() {}, undefined);
-      }).should.throw("post `/foo`: `middleware` must be a function or application, not `undefined`");
+        app.post("/foo", function *() {}, 123);
+      }).should.throw("post `/foo`: `middleware` must be a function, router or application, not `number`");
     });
   });
 
