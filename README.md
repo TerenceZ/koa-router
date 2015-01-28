@@ -90,7 +90,7 @@ Query strings will not be considered when matching requests.
 
 #### Mounting
 
-Create route for path starting with "/prefix/:id" using `router.mount()`:
+Create route for path starting with "/prefix/:id" using `router.mount()` or `router.use()`:
 
 ```javascript
 app.mount("/prefix/:id", function *(next) {
