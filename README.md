@@ -34,7 +34,8 @@ var koa = require('koa');
   , mount = require('koa-mount')
   , Router = require('koa-router');
 
-var app = koa(Router());
+var app = koa();
+app.use(Router(app));
 
 var APIv1 = new Router({ mergeParams: true });
 var app2 = koa();
